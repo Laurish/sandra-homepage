@@ -300,6 +300,46 @@
             }
         }
 
+        /* Mute Button */
+        .mute-button {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            background: var(--bg-card);
+            border: 2px solid var(--primary-color);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 217, 255, 0.3);
+        }
+
+        .mute-button:hover {
+            background: rgba(0, 217, 255, 0.1);
+            transform: scale(1.1);
+        }
+
+        .mute-button.muted {
+            border-color: var(--text-secondary);
+            box-shadow: 0 4px 20px rgba(160, 160, 176, 0.2);
+        }
+
+        .mute-icon {
+            width: 28px;
+            height: 28px;
+            fill: var(--primary-color);
+            transition: fill 0.3s ease;
+        }
+
+        .mute-button.muted .mute-icon {
+            fill: var(--text-secondary);
+        }
+
         /* Smooth scroll */
         html {
             scroll-behavior: smooth;
@@ -418,12 +458,200 @@
         </section>
     </main>
 
+    <!-- Mute Button -->
+    <button class="mute-button" id="muteButton" aria-label="Toggle sound">
+        <svg class="mute-icon" viewBox="0 0 24 24" id="soundIcon">
+            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+        </svg>
+    </button>
+
     <!-- Footer -->
     <footer>
         <p>&copy; 2024 Sandra Andriainen. All rights reserved.</p>
     </footer>
 
     <script>
+        // ============================================
+        // AUDIO SYSTEM WITH WEB AUDIO API
+        // ============================================
+        
+        class AudioSystem {
+            constructor() {
+                this.audioContext = null;
+                this.isMuted = false;
+                this.masterGain = null;
+                this.init();
+            }
+
+            init() {
+                // Create audio context on first user interaction
+                document.addEventListener('click', () => {
+                    if (!this.audioContext) {
+                        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        this.masterGain = this.audioContext.createGain();
+                        this.masterGain.connect(this.audioContext.destination);
+                        this.masterGain.gain.value = 0.3; // Master volume
+                    }
+                }, { once: true });
+            }
+
+            playHoverSound() {
+                if (this.isMuted || !this.audioContext) return;
+
+                const now = this.audioContext.currentTime;
+                
+                // Create oscillator for a subtle "whoosh" sound
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(this.masterGain);
+                
+                // Frequency sweep for whoosh effect
+                oscillator.frequency.setValueAtTime(800, now);
+                oscillator.frequency.exponentialRampToValueAtTime(400, now + 0.1);
+                
+                // Volume envelope
+                gainNode.gain.setValueAtTime(0, now);
+                gainNode.gain.linearRampToValueAtTime(0.15, now + 0.02);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                
+                oscillator.type = 'sine';
+                oscillator.start(now);
+                oscillator.stop(now + 0.15);
+            }
+
+            playClickSound() {
+                if (this.isMuted || !this.audioContext) return;
+
+                const now = this.audioContext.currentTime;
+                
+                // Create a subtle click/tick sound
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(this.masterGain);
+                
+                oscillator.frequency.setValueAtTime(1200, now);
+                oscillator.frequency.exponentialRampToValueAtTime(800, now + 0.05);
+                
+                gainNode.gain.setValueAtTime(0.2, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                
+                oscillator.type = 'triangle';
+                oscillator.start(now);
+                oscillator.stop(now + 0.08);
+            }
+
+            playScrollSound() {
+                if (this.isMuted || !this.audioContext) return;
+
+                const now = this.audioContext.currentTime;
+                
+                // Ambient tone for scroll
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(this.masterGain);
+                
+                oscillator.frequency.setValueAtTime(220, now);
+                
+                gainNode.gain.setValueAtTime(0, now);
+                gainNode.gain.linearRampToValueAtTime(0.08, now + 0.1);
+                gainNode.gain.linearRampToValueAtTime(0.01, now + 0.4);
+                
+                oscillator.type = 'sine';
+                oscillator.start(now);
+                oscillator.stop(now + 0.4);
+            }
+
+            toggleMute() {
+                this.isMuted = !this.isMuted;
+                return this.isMuted;
+            }
+        }
+
+        // Initialize audio system
+        const audioSystem = new AudioSystem();
+
+        // ============================================
+        // MUTE BUTTON FUNCTIONALITY
+        // ============================================
+        
+        const muteButton = document.getElementById('muteButton');
+        const soundIcon = document.getElementById('soundIcon');
+
+        muteButton.addEventListener('click', () => {
+            const isMuted = audioSystem.toggleMute();
+            muteButton.classList.toggle('muted', isMuted);
+            
+            if (isMuted) {
+                soundIcon.innerHTML = '<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>';
+            } else {
+                soundIcon.innerHTML = '<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>';
+            }
+            
+            audioSystem.playClickSound();
+        });
+
+        // ============================================
+        // ADD SOUND TO INTERACTIVE ELEMENTS
+        // ============================================
+        
+        // Project cards hover sound
+        document.querySelectorAll('.project-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                audioSystem.playHoverSound();
+            });
+        });
+
+        // Social links hover sound
+        document.querySelectorAll('.social-link').forEach(link => {
+            link.addEventListener('mouseenter', () => {
+                audioSystem.playClickSound();
+            });
+        });
+
+        // Email link hover sound
+        document.querySelector('.contact-email a').addEventListener('mouseenter', () => {
+            audioSystem.playClickSound();
+        });
+
+        // ============================================
+        // SCROLL SOUND (throttled)
+        // ============================================
+        
+        let lastScrollSound = 0;
+        const scrollSoundThrottle = 1000; // Only play once per second
+
+        const observerOptionsForSound = {
+            threshold: 0.5,
+            rootMargin: '0px'
+        };
+
+        const soundObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const now = Date.now();
+                    if (now - lastScrollSound > scrollSoundThrottle) {
+                        audioSystem.playScrollSound();
+                        lastScrollSound = now;
+                    }
+                }
+            });
+        }, observerOptionsForSound);
+
+        // Observe sections for scroll sounds
+        document.querySelectorAll('section').forEach(section => {
+            soundObserver.observe(section);
+        });
+
+        // ============================================
+        // ORIGINAL SMOOTH SCROLL & ANIMATIONS
+        // ============================================
+        
         // Smooth scroll for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
