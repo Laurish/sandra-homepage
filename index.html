@@ -188,6 +188,14 @@
             border-radius: 12px;
             box-shadow: 0 10px 30px rgba(0, 217, 255, 0.2);
             border: 2px solid rgba(0, 217, 255, 0.3);
+            overflow: hidden;
+        }
+
+        .about-photo img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 10px;
         }
 
         .about-content {
@@ -743,4 +751,18 @@
                 if (entry.isIntersecting) {
                     entry.target.style.opacity = '1';
                     entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe project cards
+        document.querySelectorAll('.project-card').forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+            card.style.transition = `all 0.6s ease ${index * 0.1}s`;
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>
             
