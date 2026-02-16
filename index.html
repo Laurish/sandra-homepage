@@ -449,8 +449,8 @@
                         </iframe>
                     </div>
                     <div class="project-info">
-                        <h3 class="project-title">Project Title 1</h3>
-                        <p class="project-description">Description of the project and the sound design work.</p>
+                        <h3 class="project-title">Commercial for SBD</h3>
+                        <p class="project-description">Commercial for SBD with Eddie Berglund. This is made from scratch, video editing and sound design by me.</p>
                     </div>
                 </div>
 
@@ -464,8 +464,8 @@
                         </iframe>
                     </div>
                     <div class="project-info">
-                        <h3 class="project-title">Project Title 2</h3>
-                        <p class="project-description">Description of the project and the sound design work.</p>
+                        <h3 class="project-title">Commercial for Sandviken Tyngdlyftarklubb</h3>
+                        <p class="project-description">Commercial for Junior-SM in Olympic Weightlifting which was held in Sandviken. This is made from scratch, video editing and sound design by me.</p>
                     </div>
                 </div>
 
@@ -479,8 +479,8 @@
                         </iframe>
                     </div>
                     <div class="project-info">
-                        <h3 class="project-title">Project Title 3</h3>
-                        <p class="project-description">Description of the project and the sound design work.</p>
+                        <h3 class="project-title">Commercial</h3>
+                        <p class="project-description">Sound design made by me.</p>
                     </div>
                 </div>
 
@@ -494,8 +494,8 @@
                         </iframe>
                     </div>
                     <div class="project-info">
-                        <h3 class="project-title">Project Title 4</h3>
-                        <p class="project-description">Description of the project and the sound design work.</p>
+                        <h3 class="project-title">Commercial</h3>
+                        <p class="project-description">Sound design made by me.</p>
                     </div>
                 </div>
             </div>
@@ -505,7 +505,7 @@
         <section id="contact" class="contact-section">
             <h2 class="section-title">Get in Touch</h2>
             <div class="contact-email">
-                <a href="/cdn-cgi/l/email-protection#6112000f05130800080f040f21060c00080d4f020e0c"><span class="__cf_email__" data-cfemail="3a495b545e48535b53545f547a5d575b535614595557">[email&#160;protected]</span></a>
+                <a href="mailto:sandriainen&#64;gmail.com">sandriainen&#64;gmail.com</a>
             </div>
             <div class="social-links">
                 <a href="https://www.instagram.com/sandra.sounddesign" target="_blank" class="social-link">
@@ -587,8 +587,9 @@
                 oscillator.stop(now + 0.15);
             }
 
-            playClickSound() {
-                if (this.isMuted || !this.audioContext) return;
+            playClickSound(force = false) {
+                if (!force && (this.isMuted || !this.audioContext)) return;
+                if (!this.audioContext) return;
 
                 const now = this.audioContext.currentTime;
                 
@@ -659,7 +660,8 @@
                 soundIcon.innerHTML = '<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>';
             }
             
-            audioSystem.playClickSound();
+            // Always play click sound on mute toggle
+            audioSystem.playClickSound(true);
         });
 
         // ============================================
