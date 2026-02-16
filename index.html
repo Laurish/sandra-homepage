@@ -505,7 +505,7 @@
         <section id="contact" class="contact-section">
             <h2 class="section-title">Get in Touch</h2>
             <div class="contact-email">
-                <a href="mailto:sandriainen&#64;gmail.com">sandriainen&#64;gmail.com</a>
+                <a href="/cdn-cgi/l/email-protection#a7d4c6c9c3d5cec6cec9c2c9818491939cc0cac6cecb89c4c8ca">sandriainen&#64;gmail.com</a>
             </div>
             <div class="social-links">
                 <a href="https://www.instagram.com/sandra.sounddesign" target="_blank" class="social-link">
@@ -536,7 +536,7 @@
         <p>&copy; 2024 Sandra Andriainen. All rights reserved.</p>
     </footer>
 
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
         // ============================================
         // AUDIO SYSTEM WITH WEB AUDIO API
         // ============================================
@@ -587,9 +587,8 @@
                 oscillator.stop(now + 0.15);
             }
 
-            playClickSound(force = false) {
-                if (!force && (this.isMuted || !this.audioContext)) return;
-                if (!this.audioContext) return;
+            playClickSound() {
+                if (this.isMuted || !this.audioContext) return;
 
                 const now = this.audioContext.currentTime;
                 
@@ -660,8 +659,7 @@
                 soundIcon.innerHTML = '<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>';
             }
             
-            // Always play click sound on mute toggle
-            audioSystem.playClickSound(true);
+            audioSystem.playClickSound();
         });
 
         // ============================================
@@ -745,9 +743,4 @@
                 if (entry.isIntersecting) {
                     entry.target.style.opacity = '1';
                     entry.target.style.transform = 'translateY(0)';
-                }
-            });
-        }, observerOptions);
-
-        // Observe project cards
-        document.querySelectorAll('.project-card').forEach((card, index
+            
