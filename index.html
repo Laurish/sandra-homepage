@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sandra Andriainen - Sound Designer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comforter&family=Advent+Pro:wght@300;400;500;600;700&family=Quicksand:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -21,11 +24,16 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Quicksand', 'Segoe UI', sans-serif;
             background: var(--bg-dark);
             color: var(--text-primary);
             line-height: 1.6;
             overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Advent Pro', sans-serif;
+            font-weight: 600;
         }
 
         /* Animated background */
@@ -74,6 +82,95 @@
             text-align: center;
             padding: 2rem;
             position: relative;
+            overflow: hidden;
+        }
+
+        #particles-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .photo-collage {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            height: 250px;
+            margin-bottom: 3rem;
+            z-index: 1;
+        }
+
+        .polaroid {
+            position: absolute;
+            background: white;
+            padding: 10px;
+            padding-bottom: 40px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .polaroid:hover {
+            transform: scale(1.05) !important;
+            box-shadow: 0 8px 30px rgba(0, 217, 255, 0.4);
+            z-index: 10;
+        }
+
+        .polaroid img {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .polaroid:nth-child(1) {
+            left: 5%;
+            top: 20%;
+            transform: rotate(-8deg);
+        }
+
+        .polaroid:nth-child(2) {
+            left: 22%;
+            top: 5%;
+            transform: rotate(5deg);
+        }
+
+        .polaroid:nth-child(3) {
+            left: 40%;
+            top: 30%;
+            transform: rotate(-3deg);
+            z-index: 2;
+        }
+
+        .polaroid:nth-child(4) {
+            left: 58%;
+            top: 10%;
+            transform: rotate(7deg);
+        }
+
+        .polaroid:nth-child(5) {
+            left: 75%;
+            top: 25%;
+            transform: rotate(-5deg);
+        }
+
+        @media (max-width: 768px) {
+            .photo-collage {
+                height: 180px;
+                max-width: 400px;
+            }
+
+            .polaroid img {
+                width: 100px;
+                height: 100px;
+            }
+
+            .polaroid {
+                padding: 8px;
+                padding-bottom: 30px;
+            }
         }
 
         .hero-content {
@@ -81,6 +178,7 @@
         }
 
         .hero-title {
+            font-family: 'Comforter', cursive;
             font-size: clamp(3rem, 8vw, 6rem);
             font-weight: 700;
             margin-bottom: 1rem;
@@ -92,6 +190,7 @@
         }
 
         .hero-subtitle {
+            font-family: 'Advent Pro', sans-serif;
             font-size: clamp(1.2rem, 3vw, 2rem);
             color: var(--text-secondary);
             font-weight: 300;
@@ -414,6 +513,27 @@
 
     <!-- Hero Section -->
     <header>
+        <canvas id="particles-canvas"></canvas>
+        
+        <!-- Photo Collage -->
+        <div class="photo-collage">
+            <div class="polaroid">
+                <img src="sandra.jpg" alt="Sandra 1">
+            </div>
+            <div class="polaroid">
+                <img src="photo2.jpg" alt="Sandra 2">
+            </div>
+            <div class="polaroid">
+                <img src="photo3.jpg" alt="Sandra 3">
+            </div>
+            <div class="polaroid">
+                <img src="photo4.jpg" alt="Sandra 4">
+            </div>
+            <div class="polaroid">
+                <img src="photo5.jpg" alt="Sandra 5">
+            </div>
+        </div>
+
         <div class="hero-content">
             <h1 class="hero-title">Sandra Andriainen</h1>
             <p class="hero-subtitle">Sound Designer</p>
@@ -646,6 +766,101 @@
                 return this.isMuted;
             }
         }
+
+        // ============================================
+        // SOUNDWAVE VISUALIZATION
+        // ============================================
+        
+        class SoundwaveSystem {
+            constructor() {
+                this.canvas = document.getElementById('particles-canvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.waves = [];
+                this.time = 0;
+                this.init();
+            }
+
+            init() {
+                this.resize();
+                window.addEventListener('resize', () => this.resize());
+                
+                // Create multiple wave layers
+                this.waves = [
+                    { amplitude: 40, frequency: 0.02, speed: 0.03, opacity: 0.15, color: '0, 217, 255' },
+                    { amplitude: 30, frequency: 0.025, speed: 0.025, opacity: 0.12, color: '136, 87, 255' },
+                    { amplitude: 50, frequency: 0.015, speed: 0.035, opacity: 0.1, color: '0, 217, 255' },
+                    { amplitude: 25, frequency: 0.03, speed: 0.02, opacity: 0.08, color: '136, 87, 255' }
+                ];
+                
+                this.animate();
+            }
+
+            resize() {
+                this.canvas.width = this.canvas.offsetWidth;
+                this.canvas.height = this.canvas.offsetHeight;
+            }
+
+            drawWave(wave, offset) {
+                const centerY = this.canvas.height / 2;
+                
+                this.ctx.beginPath();
+                this.ctx.moveTo(0, centerY);
+
+                for (let x = 0; x < this.canvas.width; x += 5) {
+                    const y = centerY + 
+                        Math.sin((x * wave.frequency) + (this.time * wave.speed) + offset) * wave.amplitude +
+                        Math.sin((x * wave.frequency * 2) + (this.time * wave.speed * 1.5) + offset) * (wave.amplitude * 0.5);
+                    
+                    this.ctx.lineTo(x, y);
+                }
+
+                this.ctx.strokeStyle = `rgba(${wave.color}, ${wave.opacity})`;
+                this.ctx.lineWidth = 2;
+                this.ctx.stroke();
+
+                // Add glow effect
+                this.ctx.shadowBlur = 15;
+                this.ctx.shadowColor = `rgba(${wave.color}, ${wave.opacity * 0.8})`;
+                this.ctx.stroke();
+                this.ctx.shadowBlur = 0;
+            }
+
+            animate() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                // Draw each wave layer
+                this.waves.forEach((wave, index) => {
+                    this.drawWave(wave, index * Math.PI / 4);
+                });
+
+                this.time += 1;
+                requestAnimationFrame(() => this.animate());
+            }
+        }
+
+        // ============================================
+        // PARALLAX EFFECT
+        // ============================================
+        
+        function initParallax() {
+            const heroContent = document.querySelector('.hero-content');
+            
+            window.addEventListener('scroll', () => {
+                const scrolled = window.pageYOffset;
+                const parallaxSpeed = 0.5;
+                
+                if (heroContent) {
+                    heroContent.style.transform = `translateY(${scrolled * parallaxSpeed}px)`;
+                    heroContent.style.opacity = 1 - (scrolled / 500);
+                }
+            });
+        }
+
+        // Initialize soundwave system
+        const soundwaveSystem = new SoundwaveSystem();
+        
+        // Initialize parallax
+        initParallax();
 
         // Initialize audio system
         const audioSystem = new AudioSystem();
